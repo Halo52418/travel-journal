@@ -3247,14 +3247,20 @@ function geometryToPath(geometry, project) {
 
 async function loadGeoJSON() {
   if (chinaGeoJSON) return chinaGeoJSON;
-  try {
-    const res = await fetch(MAP_URL);
-    if (!res.ok) throw new Error('fetch failed');
-    chinaGeoJSON = await res.json();
-    return chinaGeoJSON;
-  } catch(err) {
-    return null;
+  // Try local path first (works when deployed with china.json next to index.html).
+  // Falls back to remote URL when running from file:// or when local copy missing.
+  const candidates = ['china.json', 'data/china.json', MAP_URL];
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      chinaGeoJSON = await res.json();
+      return chinaGeoJSON;
+    } catch(err) {
+      // Try next candidate
+    }
   }
+  return null;
 }
 
 // Resolve origin city's lat/lon — if origin matches our city DB, use that; else default to home.
@@ -3718,7 +3724,7 @@ function runDemoSegment(tripIdx, posInDemo) {
     
     // Use SVG getPointAtLength for accurate positioning
     const pathLen = arc.getTotalLength();
-    const FLY_MS = 1800;
+    const FLY_MS = 3000;
     const startT = performance.now();
     
     // Create spark as a div positioned over the wrap
