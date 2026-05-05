@@ -852,8 +852,7 @@
   .polaroid-img {
     width: 100%;
     aspect-ratio: 4/3;
-    background-size: contain;
-    background-repeat: no-repeat;
+    background-size: cover;
     background-position: center;
     background-color: var(--paper-shadow);
     position: relative;
@@ -1064,18 +1063,20 @@
   
   .detail-img-layer {
     position: absolute; inset: 0;
-    background-size: cover;
+    background-size: contain;
+    background-repeat: no-repeat;
     background-position: center;
+    background-color: var(--ink);
     opacity: 0;
     transition: opacity 0.6s;
   }
   .detail-img-layer.visible {
     opacity: 1;
-    animation: kenburns 8s ease-out forwards;
+    animation: kenburns 12s ease-out forwards;
   }
   @keyframes kenburns {
-    0% { transform: scale(1) translate(0,0); }
-    100% { transform: scale(1.15) translate(-3%, 2%); }
+    0% { transform: scale(1); }
+    100% { transform: scale(1.04); }
   }
   
   .detail-img-decorations { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
@@ -1551,8 +1552,7 @@
   .image-thumb {
     width: 110px;
     height: 110px;
-    background-size: contain;
-    background-repeat: no-repeat;
+    background-size: cover;
     background-position: center;
     background-color: var(--paper-shadow);
     position: relative;
@@ -2207,6 +2207,63 @@
     .toolbar-main { display: none; }
     .toolbar-backdrop { display: none; }
   }
+
+  /* ============= FLOATING BGM BUTTON ============= */
+  .bgm-float-btn {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--ink-soft);
+    box-shadow: 2px 2px 0 var(--ink), 0 2px 8px rgba(0,0,0,0.15);
+    cursor: pointer;
+    z-index: 95;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .bgm-float-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink), 0 3px 10px rgba(0,0,0,0.2);
+  }
+  .bgm-float-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+  .bgm-float-icon {
+    font-size: 20px;
+    line-height: 1;
+    display: inline-block;
+    transition: opacity 0.3s;
+  }
+  .bgm-float-btn.playing .bgm-float-icon {
+    animation: bgmSpin 4s linear infinite;
+  }
+  .bgm-float-btn.muted .bgm-float-icon {
+    opacity: 0.45;
+  }
+  .bgm-float-btn.pending {
+    animation: bgmPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes bgmSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes bgmPulse {
+    0%, 100% { box-shadow: 2px 2px 0 var(--ink), 0 0 0 0 rgba(168, 60, 50, 0.4); }
+    50% { box-shadow: 2px 2px 0 var(--ink), 0 0 0 8px rgba(168, 60, 50, 0); }
+  }
+  .bgm-float-btn.hidden { display: none; }
+  
+  @media (max-width: 768px) {
+    .bgm-float-btn { top: 12px; left: 12px; width: 40px; height: 40px; }
+    .bgm-float-icon { font-size: 18px; }
+  }
   
   @media (max-width: 768px) {
     .nav-top { padding: 12px 14px; flex-wrap: wrap; gap: 10px; }
@@ -2288,8 +2345,11 @@
     }
     .map-zoom-btn:active { background: var(--ink); color: var(--paper); }
     
-    /* City labels hidden by default on mobile (too crowded) */
-    .city-pin text { display: none; }
+    /* City labels visible on mobile too (smaller font for clarity) */
+    .city-pin text { 
+      display: block; 
+      font-size: 11px;
+    }
     .city-pin .pin-main { r: 5; }
     .city-pin circle:nth-child(2) { r: 10; }  /* outer ring bigger for tap target */
     
@@ -2414,9 +2474,9 @@
           <div id="timeFilterQuicks" style="display:flex;gap:6px;flex-wrap:wrap"><button class="tf-quick active" data-tf-quick="all">全部</button><button class="tf-quick" data-tf-quick="2022">2022</button><button class="tf-quick" data-tf-quick="2024">2024</button><button class="tf-quick" data-tf-quick="2025">2025</button></div>
         </div>
         <div class="tf-slider-wrap" id="tfSliderWrap">
-          <div class="tf-track"><div class="tf-track-active" id="tfTrackActive" style="left: 0px; width: 867px;"></div></div>
+          <div class="tf-track"><div class="tf-track-active" id="tfTrackActive" style="left: 0px; width: 1279px;"></div></div>
           <div class="tf-handle" id="tfHandleStart" data-handle="start" style="left: 14px; top: 50%;"></div>
-          <div class="tf-handle" id="tfHandleEnd" data-handle="end" style="left: 881px; top: 50%;"></div>
+          <div class="tf-handle" id="tfHandleEnd" data-handle="end" style="left: 1293px; top: 50%;"></div>
         </div>
         <div class="tf-dates">
           <button type="button" class="tf-date-btn" id="tfDateStart" title="点击选择起始日期">2022-08-08</button>
@@ -2631,37 +2691,32 @@
   <div class="h-timeline-wrap" id="hTimelineWrap">
     <div class="h-timeline" id="hTimeline">
       <div class="h-tl-indicator"></div>
-      <div class="h-timeline-track" id="hTimelineTrack" style="transform: translateX(-81px);"><div class="h-tl-year-block current" data-year="2022"><div class="h-tl-year">2022</div><div class="h-tl-cities"><div class="h-tl-city" data-trip-idx="0" title="宁波 · 2022-08-08"><div class="h-tl-city-tip">宁波</div></div><div class="h-tl-city active" data-trip-idx="1" title="绍兴 · 2022-08-11"><div class="h-tl-city-tip">绍兴</div></div><div class="h-tl-city" data-trip-idx="2" title="南昌 · 2022-08-16"><div class="h-tl-city-tip">南昌</div></div><div class="h-tl-city" data-trip-idx="3" title="长沙 · 2022-08-17"><div class="h-tl-city-tip">长沙</div></div></div></div><div class="h-tl-sep"></div><div class="h-tl-year-block" data-year="2024"><div class="h-tl-year">2024</div><div class="h-tl-cities"><div class="h-tl-city" data-trip-idx="4" title="济南 · 2024-06-19"><div class="h-tl-city-tip">济南</div></div><div class="h-tl-city" data-trip-idx="5" title="泰安 · 2024-06-20"><div class="h-tl-city-tip">泰安</div></div><div class="h-tl-city" data-trip-idx="6" title="青岛 · 2024-06-21"><div class="h-tl-city-tip">青岛</div></div><div class="h-tl-city" data-trip-idx="7" title="烟台 · 2024-06-21"><div class="h-tl-city-tip">烟台</div></div><div class="h-tl-city" data-trip-idx="8" title="威海 · 2024-06-23"><div class="h-tl-city-tip">威海</div></div><div class="h-tl-city" data-trip-idx="9" title="成都 · 2024-10-03"><div class="h-tl-city-tip">成都</div></div></div></div><div class="h-tl-sep"></div><div class="h-tl-year-block" data-year="2025"><div class="h-tl-year">2025</div><div class="h-tl-cities"><div class="h-tl-city" data-trip-idx="10" title="武汉 · 2025-02-16"><div class="h-tl-city-tip">武汉</div></div><div class="h-tl-city" data-trip-idx="11" title="丽江 · 2025-05-05"><div class="h-tl-city-tip">丽江</div></div><div class="h-tl-city" data-trip-idx="12" title="香格里拉 · 2025-05-06"><div class="h-tl-city-tip">香格里拉</div></div><div class="h-tl-city" data-trip-idx="13" title="昆明 · 2025-05-07"><div class="h-tl-city-tip">昆明</div></div><div class="h-tl-city" data-trip-idx="14" title="北京市 · 2025-08-05"><div class="h-tl-city-tip">北京市</div></div><div class="h-tl-city" data-trip-idx="15" title="甘孜 · 2025-08-12"><div class="h-tl-city-tip">甘孜</div></div></div></div></div>
+      <div class="h-timeline-track" id="hTimelineTrack" style="transform: translateX(-573px);"><div class="h-tl-year-block" data-year="2022"><div class="h-tl-year">2022</div><div class="h-tl-cities"><div class="h-tl-city" data-trip-idx="0" title="宁波 · 2022-08-08"><div class="h-tl-city-tip">宁波</div></div><div class="h-tl-city" data-trip-idx="1" title="绍兴 · 2022-08-11"><div class="h-tl-city-tip">绍兴</div></div><div class="h-tl-city" data-trip-idx="2" title="南昌 · 2022-08-16"><div class="h-tl-city-tip">南昌</div></div><div class="h-tl-city" data-trip-idx="3" title="长沙 · 2022-08-17"><div class="h-tl-city-tip">长沙</div></div></div></div><div class="h-tl-sep"></div><div class="h-tl-year-block" data-year="2024"><div class="h-tl-year">2024</div><div class="h-tl-cities"><div class="h-tl-city" data-trip-idx="4" title="济南 · 2024-06-19"><div class="h-tl-city-tip">济南</div></div><div class="h-tl-city" data-trip-idx="5" title="泰安 · 2024-06-20"><div class="h-tl-city-tip">泰安</div></div><div class="h-tl-city" data-trip-idx="6" title="青岛 · 2024-06-21"><div class="h-tl-city-tip">青岛</div></div><div class="h-tl-city" data-trip-idx="7" title="烟台 · 2024-06-21"><div class="h-tl-city-tip">烟台</div></div><div class="h-tl-city" data-trip-idx="8" title="威海 · 2024-06-23"><div class="h-tl-city-tip">威海</div></div><div class="h-tl-city" data-trip-idx="9" title="成都 · 2024-10-03"><div class="h-tl-city-tip">成都</div></div></div></div><div class="h-tl-sep"></div><div class="h-tl-year-block current" data-year="2025"><div class="h-tl-year">2025</div><div class="h-tl-cities"><div class="h-tl-city" data-trip-idx="10" title="武汉 · 2025-02-16"><div class="h-tl-city-tip">武汉</div></div><div class="h-tl-city" data-trip-idx="11" title="丽江 · 2025-05-05"><div class="h-tl-city-tip">丽江</div></div><div class="h-tl-city" data-trip-idx="12" title="香格里拉 · 2025-05-06"><div class="h-tl-city-tip">香格里拉</div></div><div class="h-tl-city" data-trip-idx="13" title="昆明 · 2025-05-07"><div class="h-tl-city-tip">昆明</div></div><div class="h-tl-city" data-trip-idx="14" title="北京市 · 2025-08-05"><div class="h-tl-city-tip">北京市</div></div><div class="h-tl-city active" data-trip-idx="15" title="甘孜 · 2025-08-12"><div class="h-tl-city-tip">甘孜</div></div></div></div></div>
     </div>
   </div>
   <main class="scrapbook" id="scrapbook"><div class="scrap-year-header" data-year="2022">
       <div class="scrap-year">2022</div>
       <div class="scrap-year-stamp">4 stops</div>
       <div class="scrap-year-line"></div>
-    </div><div class="scrap-grid"><div class="polaroid" data-card-idx="0" data-year="2022" style="--rot: 0.44deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/ffc4f59b-3e70-4595-820a-6a77dfb90db4&quot;);"></div>
+    </div><div class="scrap-grid"><div class="polaroid" data-card-idx="0" data-year="2022" style="--rot: 0.34deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/09b22c62-2551-40ef-ab90-78873b34e91d&quot;);"></div>
           <div class="polaroid-stamp">08.08</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">宁波</div>
             <div class="polaroid-date">浙江 · 夏天的开始</div>
           </div>
-        </div><div class="ticket" data-card-idx="1" data-year="2022" style="--rot: -0.75deg; --span: 4;">
-          <div class="ticket-header">
-            <div class="ticket-meta">BOARDING PASS · 浙江</div>
-            <div class="ticket-num">№ 002</div>
+        </div><div class="polaroid" data-card-idx="1" data-year="2022" style="--rot: 1.81deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/9da7a02e-187a-40fd-b4e9-92e87644a52e&quot;);"></div>
+          <div class="polaroid-stamp">08.11</div>
+          <div class="polaroid-caption">
+            <div class="polaroid-place">绍兴</div>
+            <div class="polaroid-date">浙江 · 夏日小酌</div>
           </div>
-          <div class="ticket-place">绍兴</div>
-          <div class="ticket-en">Shaoxing</div>
-          <div class="ticket-date">
-            <span>2022.08.11</span>
-            <span>夏日小酌</span>
-          </div>
-        </div><div class="polaroid" data-card-idx="2" data-year="2022" style="--rot: -2.97deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/3932a69a-9b03-4207-9d26-3f087903a42e&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="2" data-year="2022" style="--rot: -1.69deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/41863ccf-ad30-4de5-8502-89780653df47&quot;);"></div>
           <div class="polaroid-stamp">08.16</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">南昌</div>
             <div class="polaroid-date">江西 · 中部一日</div>
           </div>
-        </div><div class="polaroid" data-card-idx="3" data-year="2022" style="--rot: -0.49deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/7e5fc712-f993-4964-af26-aec4bdf571da&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="3" data-year="2022" style="--rot: 1.26deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/ec5c3591-58e7-430f-8a2b-070c97f74fd0&quot;);"></div>
           <div class="polaroid-stamp">08.17</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">长沙</div>
@@ -2671,35 +2726,37 @@
       <div class="scrap-year">2024</div>
       <div class="scrap-year-stamp">6 stops</div>
       <div class="scrap-year-line"></div>
-    </div><div class="scrap-grid"><div class="polaroid" data-card-idx="4" data-year="2024" style="--rot: 2.27deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/9bf4e1ec-3706-4c17-a29b-76f61464560d&quot;);"></div>
+    </div><div class="scrap-grid"><div class="polaroid" data-card-idx="4" data-year="2024" style="--rot: -1.29deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/06ca1145-4a6d-4523-acd9-5db7e6ac3027&quot;);"></div>
           <div class="polaroid-stamp">06.19</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">济南</div>
             <div class="polaroid-date">山东 · 齐鲁第一站</div>
           </div>
-        </div><div class="polaroid" data-card-idx="5" data-year="2024" style="--rot: 2.99deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/9c54aabf-71cc-400e-b863-2c31f346902b&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="5" data-year="2024" style="--rot: -2.23deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/5ea39808-ff8f-4568-9efe-5efdfbe8f049&quot;);"></div>
           <div class="polaroid-stamp">06.20</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">泰安</div>
             <div class="polaroid-date">山东 · 一日登顶</div>
           </div>
-        </div><div class="polaroid" data-card-idx="6" data-year="2024" style="--rot: -1.17deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/db85584a-047f-4182-8a13-189f4d43c026&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="6" data-year="2024" style="--rot: -2.53deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/fcb5c40e-1823-4c91-abcb-a1a79a986467&quot;);"></div>
           <div class="polaroid-stamp">06.21</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">青岛</div>
             <div class="polaroid-date">山东 · 半日海风</div>
           </div>
-        </div><div class="polaroid" data-card-idx="7" data-year="2024" style="--rot: 2.62deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/176cb82e-f297-4973-8e2c-60aad5ceec8b&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="7" data-year="2024" style="--rot: 1.57deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/42ccec2e-1e6f-4f81-ac6a-0ef7662bafdd&quot;);"></div>
           <div class="polaroid-stamp">06.21</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">烟台</div>
             <div class="polaroid-date">山东 · 当晚抵达</div>
           </div>
-        </div><div class="note" data-card-idx="8" data-year="2024" style="--rot: -1.81deg; --span: 4;">
-          <div class="note-pin"></div>
-          <div class="note-quote">中国的最东边，海是真的蓝。</div>
-          <div class="note-meta">威海 · 2024.06</div>
-        </div><div class="polaroid" data-card-idx="9" data-year="2024" style="--rot: -0.43deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/f71b2ba7-5d92-49b6-bfbe-dc30bfa40326&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="8" data-year="2024" style="--rot: 0.95deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/83904daf-5d71-4f8b-adaf-d03380b5e3ca&quot;);"></div>
+          <div class="polaroid-stamp">06.23</div>
+          <div class="polaroid-caption">
+            <div class="polaroid-place">威海</div>
+            <div class="polaroid-date">山东 · 海岸尽头</div>
+          </div>
+        </div><div class="polaroid" data-card-idx="9" data-year="2024" style="--rot: -1.36deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/f2b466be-8b51-477e-a6ee-3eb475caf1f7&quot;);"></div>
           <div class="polaroid-stamp">10.03</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">成都</div>
@@ -2709,42 +2766,37 @@
       <div class="scrap-year">2025</div>
       <div class="scrap-year-stamp">6 stops</div>
       <div class="scrap-year-line"></div>
-    </div><div class="scrap-grid"><div class="polaroid" data-card-idx="10" data-year="2025" style="--rot: -1.40deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/10be7428-061a-41f6-b4e3-05be4f25ee24&quot;);"></div>
+    </div><div class="scrap-grid"><div class="polaroid" data-card-idx="10" data-year="2025" style="--rot: -2.10deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/8954ea78-ad73-43d9-8052-43a66780211a&quot;);"></div>
           <div class="polaroid-stamp">02.16</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">武汉</div>
             <div class="polaroid-date">湖北 · 春节途中</div>
           </div>
-        </div><div class="polaroid" data-card-idx="11" data-year="2025" style="--rot: 0.53deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/c773a585-2302-4080-a0c7-b1d69dadb0cf&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="11" data-year="2025" style="--rot: -2.95deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/24d7ab28-83e7-432e-bdd4-613df0e92cc2&quot;);"></div>
           <div class="polaroid-stamp">05.05</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">丽江</div>
             <div class="polaroid-date">云南 · 云南启程</div>
           </div>
-        </div><div class="polaroid" data-card-idx="12" data-year="2025" style="--rot: -0.78deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/5c6ff62d-8d4c-4f10-a812-ba7a01ccccec&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="12" data-year="2025" style="--rot: -2.61deg; --span: 5;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/9c580b90-2df3-4e93-9117-1706f74cb3e6&quot;);"></div>
           <div class="polaroid-stamp">05.06</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">香格里拉</div>
             <div class="polaroid-date">云南 · 高原之上</div>
           </div>
-        </div><div class="ticket" data-card-idx="13" data-year="2025" style="--rot: -0.36deg; --span: 4;">
-          <div class="ticket-header">
-            <div class="ticket-meta">BOARDING PASS · 云南</div>
-            <div class="ticket-num">№ 014</div>
+        </div><div class="polaroid" data-card-idx="13" data-year="2025" style="--rot: 1.14deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/0dd9ee48-e043-4b61-b362-42e786ae6928&quot;);"></div>
+          <div class="polaroid-stamp">05.07</div>
+          <div class="polaroid-caption">
+            <div class="polaroid-place">昆明</div>
+            <div class="polaroid-date">云南 · 回到春城</div>
           </div>
-          <div class="ticket-place">昆明</div>
-          <div class="ticket-en">Kunming</div>
-          <div class="ticket-date">
-            <span>2025.05.07</span>
-            <span>回到春城</span>
-          </div>
-        </div><div class="polaroid" data-card-idx="14" data-year="2025" style="--rot: 0.93deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/3c1c2f1c-404d-4ea1-8846-919b973ea8cc&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="14" data-year="2025" style="--rot: 0.70deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/0d963ec8-7142-4bbb-ad84-d4950281b309&quot;);"></div>
           <div class="polaroid-stamp">08.05</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">北京市</div>
             <div class="polaroid-date">北京 · 北上</div>
           </div>
-        </div><div class="polaroid" data-card-idx="15" data-year="2025" style="--rot: -1.52deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/114ef0b1-d545-441c-ad3e-9198c19d1cba&quot;);"></div>
+        </div><div class="polaroid" data-card-idx="15" data-year="2025" style="--rot: -2.57deg; --span: 4;"><div class="polaroid-img" style="background-image: url(&quot;blob:null/43a6de92-e1ec-424d-869a-4aa7c03c13ec&quot;);"></div>
           <div class="polaroid-stamp">08.12</div>
           <div class="polaroid-caption">
             <div class="polaroid-place">甘孜</div>
@@ -2886,7 +2938,7 @@
   </div>
 </div>
 
-<!-- SETTINGS MODAL — unified hub: 我的家 / 行程分组 / 背景音乐 / 部署教程 -->
+<!-- SETTINGS MODAL — unified hub: 我的家 / 行程分组 / 背景音乐 -->
 <div class="modal" id="settingsModal">
   <div class="modal-bg" data-close-settings-modal=""></div>
   <div class="modal-card">
@@ -2899,7 +2951,6 @@
         <button class="settings-tab active owner-only" data-settings-tab="home"><span class="settings-tab-icon">🏠</span> 我的家</button>
         <button class="settings-tab owner-only" data-settings-tab="seg"><span class="settings-tab-icon">⚡</span> 行程分组</button>
         <button class="settings-tab" data-settings-tab="music"><span class="settings-tab-icon">🎵</span> 背景音乐</button>
-        <button class="settings-tab" data-settings-tab="deploy"><span class="settings-tab-icon">📤</span> 部署教程</button>
       </nav>
       
       <!-- HOME pane -->
@@ -2998,46 +3049,14 @@
         </div>
       </section>
       
-      <!-- DEPLOY pane -->
-      <section class="settings-pane" id="paneDeploy" hidden="" style="font-family:'Kalam',cursive;font-size:14px;line-height:1.8;color:var(--ink)">
-        <div class="settings-pane-title">部署教程 📤</div>
-        <div class="settings-pane-sub">How to put this online for free</div>
-        <h3 style="font-family:'Ma Shan Zheng',cursive;font-size:20px;margin-bottom:8px;color:var(--red-stamp)">推荐方案：GitHub Pages（免费）</h3>
-        <ol style="padding-left:20px;margin-bottom:16px">
-          <li>注册一个 <a href="https://github.com" target="_blank" style="color:var(--blue-stamp)">GitHub</a> 账号</li>
-          <li>新建一个仓库（Repository），名字叫 <code style="background:rgba(0,0,0,0.05);padding:1px 6px">你的用户名.github.io</code></li>
-          <li>把这个 HTML 文件改名为 <code style="background:rgba(0,0,0,0.05);padding:1px 6px">index.html</code> 上传到仓库</li>
-          <li>等 1-2 分钟，访问 <code>https://你的用户名.github.io</code> 就能看到了 ✿</li>
-        </ol>
-        
-        <h3 style="font-family:'Ma Shan Zheng',cursive;font-size:20px;margin-bottom:8px;color:var(--red-stamp);margin-top:18px">关于照片</h3>
-        <p style="margin-bottom:8px">
-          现在你的照片存在浏览器本地（IndexedDB），<strong>换电脑/清缓存会丢失</strong>，朋友也看不到。
-        </p>
-        <p style="margin-bottom:8px"><strong>方案 A · 最简单：</strong> 定期用工具栏的"↓ 导出 zip"备份到云盘。</p>
-        <p style="margin-bottom:8px"><strong>方案 B · 真上线：</strong></p>
-        <ol style="padding-left:20px;margin-bottom:16px">
-          <li>在 GitHub 仓库里创建 <code style="background:rgba(0,0,0,0.05);padding:1px 6px">images/</code> 文件夹</li>
-          <li>把照片传进去（直接拖拽到 GitHub 网页就行）</li>
-          <li>编辑某条旅行时，"添加网络图片链接"那里填: <code style="background:rgba(0,0,0,0.05);padding:1px 6px">images/你的图片名.jpg</code></li>
-          <li>这样朋友也能看到你的照片</li>
-        </ol>
-        
-        <h3 style="font-family:'Ma Shan Zheng',cursive;font-size:20px;margin-bottom:8px;color:var(--red-stamp);margin-top:18px">其他免费方案</h3>
-        <p style="margin-bottom:6px">
-          · <a href="https://vercel.com" target="_blank" style="color:var(--blue-stamp)">Vercel</a> — 拖拽 HTML 文件到网页就部署完
-        </p>
-        <p>
-          · <a href="https://www.netlify.com" target="_blank" style="color:var(--blue-stamp)">Netlify</a> — 同上，操作类似
-        </p>
-      </section>
+    </div>
     </div>
     <div class="modal-footer" style="justify-content:space-between">
       <button class="btn btn-secondary owner-only" id="btnLockVisitor" style="font-size:13px;opacity:0.75" title="切换到访客视角预览（重新访问带 ?edit=1 的网址可解锁）">🔒 切换到访客模式</button>
       <button class="btn btn-secondary" data-close-settings-modal="">关闭 ✿</button>
     </div>
   </div>
-</div>
+
 
 <div class="toolbar" id="toolbar">
   <button class="toolbar-btn" id="btnSettings" data-fab-idx="0" title="设置">⚙</button>
@@ -3047,8 +3066,12 @@
   <button class="toolbar-btn toolbar-main" id="btnFabMain" title="菜单">＋</button>
   <input type="file" id="fileImport" accept=".zip,.json" style="display:none">
   <input type="file" id="fileMusic" accept="audio/*" style="display:none">
-  <audio id="bgmAudio" loop="" preload="auto" src="blob:null/992b87d5-6e11-4810-9d21-fccfd3741645"></audio>
+  <audio id="bgmAudio" loop="" preload="auto" src="blob:null/0b1c5df9-d741-4726-9d2a-b666b08b62ff"></audio>
 </div>
+<!-- Floating music control button (visible to all visitors) -->
+<button class="bgm-float-btn playing" id="bgmFloatBtn" type="button" title="暂停背景音乐" aria-label="背景音乐开关">
+  <span class="bgm-float-icon">🎵</span>
+</button>
 <div class="toolbar-backdrop" id="toolbarBackdrop"></div>
 
 <footer class="footer">
@@ -3301,7 +3324,7 @@ const DEFAULT_TRIPS = [
   { id:"t001", date:"2022-08-08", region:"浙江", cnName:"宁波", enName:"Ningbo", lat:29.86, lon:121.55, origin:"重庆", segOverride:0, duration:"夏天的开始", quote:"童年记忆里的海风。", tags:["江南","海滨","童年"],
     imageRefs:["images/t001-1.jpg","images/t001-2.jpg"], diary:"第一次一个人出去这么远的地方！~" },
   { id:"t002", date:"2022-08-11", region:"浙江", cnName:"绍兴", enName:"Shaoxing", lat:30.03, lon:120.58, origin:"重庆", segOverride:0, duration:"夏日小酌", quote:"黄酒、乌篷船，和很多个鲁迅。", tags:["古镇","人文","黄酒"],
-    imageRefs:["images/t002-1.jpg","images/t002-2.jpg","images/t002-3.jpg","images/t002-4.jpg","images/t002-5.jpg","images/t002-6.jpg","images/t002-7.jpg","images/t002-8.jpg"], diary:"到绍兴，鲁迅故里，百草园三味书屋，东湖！" },
+    imageRefs:["images/t002-1.jpg","images/t002-2.jpg","images/t002-3.jpg","images/t002-4.jpg","images/t002-5.jpg","images/t002-6.jpg","images/t002-7.jpg","images/t002-8.jpg"], diary:"到绍兴，鲁迅故里，百草园三味书屋，东湖！", cardStyle:"polaroid" },
   { id:"t003", date:"2022-08-16", region:"江西", cnName:"南昌", enName:"Nanchang", lat:28.68, lon:115.89, origin:"重庆", segOverride:0, duration:"中部一日", quote:"滕王阁外，赣江的风又大又野。", tags:["人文","夏夜","过路"],
     imageRefs:["images/t003-1.jpg","images/t003-2.jpg","images/t003-3.jpg","images/t003-4.jpg","images/t003-5.jpg","images/t003-6.jpg"], diary:"南昌八一广场~" },
   { id:"t011", date:"2022-08-17", region:"湖南", cnName:"长沙", enName:"Changsha", lat:28.23, lon:112.94, origin:"重庆", segOverride:0, duration:"南行", quote:"夜市、奶茶、和橘子洲头的灯。", tags:["夜生活","小吃","热闹"],
@@ -3315,17 +3338,17 @@ const DEFAULT_TRIPS = [
   { id:"t007", date:"2024-06-21", region:"山东", cnName:"烟台", enName:"Yantai", lat:37.46, lon:121.45, origin:"重庆", segOverride:0, duration:"当晚抵达", quote:"深夜的渔人码头，灯火像海面上的星。", tags:["海港","夜景","海鲜"],
     imageRefs:["images/t007-1.jpg","images/t007-2.jpg","images/t007-3.jpg","images/t007-4.jpg","images/t007-5.jpg","images/t007-6.jpg","images/t007-7.jpg","images/t007-8.jpg","images/t007-9.jpg","images/t007-10.jpg"], diary:"到烟台看，拜八仙，看海鸥，去庄园~" },
   { id:"t008", date:"2024-06-23", region:"山东", cnName:"威海", enName:"Weihai", lat:37.51, lon:122.12, origin:"重庆", segOverride:0, duration:"海岸尽头", quote:"中国的最东边，海是真的蓝。", tags:["海岸","宁静","远方"],
-    imageRefs:["images/t008-1.jpg","images/t008-2.jpg","images/t008-3.jpg","images/t008-4.jpg","images/t008-5.jpg","images/t008-6.jpg","images/t008-7.jpg","images/t008-8.jpg","images/t008-9.jpg","images/t008-10.jpg","images/t008-11.jpg"], diary:"行程结束，逛了威海小镇，水族馆" },
+    imageRefs:["images/t008-1.jpg","images/t008-2.jpg","images/t008-3.jpg","images/t008-4.jpg","images/t008-5.jpg","images/t008-6.jpg","images/t008-7.jpg","images/t008-8.jpg","images/t008-9.jpg","images/t008-10.jpg","images/t008-11.jpg"], diary:"行程结束，逛了威海小镇，水族馆", cardStyle:"polaroid-large" },
   { id:"t009", date:"2024-10-03", region:"四川", cnName:"成都", enName:"Chengdu", lat:30.66, lon:104.07, origin:"重庆", segOverride:0, duration:"国庆奔赴", quote:"火锅、人潮、和慢得理直气壮的下午。", tags:["美食","熊猫","慢生活"],
     imageRefs:["images/t009-1.jpg","images/t009-2.jpg","images/t009-3.jpg","images/t009-4.jpg","images/t009-5.jpg"], diary:"趁着国庆假期去成都玩一趟" },
   { id:"t010", date:"2025-02-16", region:"湖北", cnName:"武汉", enName:"Wuhan", lat:30.59, lon:114.3, origin:"重庆", segOverride:0, duration:"春节途中", quote:"冬天的长江，沉默又辽阔。", tags:["长江","冬天","过年"],
-    imageRefs:["images/t010-1.jpg","images/t010-2.jpg","images/t010-3.jpg","images/t010-4.jpg","images/t010-5.jpg","images/t010-6.jpg","images/t010-7.jpg","images/t010-8.jpg","images/t010-9.jpg","images/t010-10.jpg"] },
+    imageRefs:["images/t010-1.jpg","images/t010-2.jpg","images/t010-3.jpg","images/t010-4.jpg","images/t010-5.jpg","images/t010-6.jpg","images/t010-7.jpg","images/t010-8.jpg","images/t010-9.jpg"] },
   { id:"t012", date:"2025-05-05", region:"云南", cnName:"丽江", enName:"Lijiang", lat:26.86, lon:100.23, origin:"重庆", segOverride:0, duration:"云南启程", quote:"古城里走丢，又被音乐找回来。", tags:["古城","雪山","民谣"],
     imageRefs:["images/t012-1.jpg","images/t012-2.jpg","images/t012-3.jpg","images/t012-4.jpg","images/t012-5.jpg","images/t012-6.jpg","images/t012-7.jpg","images/t012-8.jpg","images/t012-9.jpg","images/t012-10.jpg","images/t012-11.jpg"], cardStyle:"polaroid" },
   { id:"t013", date:"2025-05-06", region:"云南", cnName:"香格里拉", enName:"Shangri-La", lat:27.83, lon:99.71, origin:"重庆", segOverride:0, duration:"高原之上", quote:"蓝得发疼的天，和呼吸不够用的山。", tags:["高原","藏区","神圣"],
     imageRefs:["images/t013-1.jpg","images/t013-2.jpg","images/t013-3.jpg","images/t013-4.jpg","images/t013-5.jpg","images/t013-6.jpg","images/t013-7.jpg"], diary:"香格里拉，一个缺氧的地方", cardStyle:"polaroid-large" },
   { id:"t014", date:"2025-05-07", region:"云南", cnName:"昆明", enName:"Kunming", lat:25.04, lon:102.71, origin:"重庆", segOverride:0, duration:"回到春城", quote:"滇池的风，把所有疲惫都吹散了。", tags:["春城","湖泊","鲜花"],
-    imageRefs:["images/t014-1.jpg","images/t014-2.jpg","images/t014-3.jpg","images/t014-4.jpg","images/t014-5.jpg","images/t014-6.jpg","images/t014-7.jpg"], cardStyle:"ticket" },
+    imageRefs:["images/t014-1.jpg","images/t014-2.jpg","images/t014-3.jpg","images/t014-4.jpg","images/t014-5.jpg","images/t014-6.jpg","images/t014-7.jpg"], cardStyle:"polaroid" },
   { id:"t015", date:"2025-08-05", region:"北京", cnName:"北京市", enName:"Beijing", lat:39.9, lon:116.4, origin:"重庆", segOverride:0, duration:"北上", quote:"夏天的清华园，蝉鸣盖过一切。", tags:["首都","校园","夏夜"],
     imageRefs:["images/t015-1.jpg","images/t015-2.jpg","images/t015-3.jpg","images/t015-4.jpg","images/t015-5.jpg","images/t015-6.jpg","images/t015-7.jpg","images/t015-8.jpg","images/t015-9.jpg","images/t015-10.jpg","images/t015-11.jpg","images/t015-12.jpg","images/t015-13.jpg","images/t015-14.jpg"], diary:"和王总到北京参加360的SCI.AI大会~", cardStyle:"polaroid" },
   { id:"t016", date:"2025-08-12", region:"四川", cnName:"甘孜", enName:"Garzê", lat:30.05, lon:101.96, origin:"重庆", segOverride:0, duration:"横断山脉", quote:"云在脚下，星河在头顶。", tags:["藏区","高原","震撼"],
@@ -3768,6 +3791,15 @@ async function renderMap() {
   
   // Mobile zoom setup
   if (typeof setupMapZoom === 'function') setupMapZoom();
+  
+  // Apply default mobile zoom (1.5x centered on home) — only on initial render
+  if (!window._mobileZoomApplied) {
+    window._mobileZoomApplied = true;
+    // Wait a frame so layout settles and SVG getBoundingClientRect is accurate
+    requestAnimationFrame(() => {
+      requestAnimationFrame(applyDefaultMobileZoom);
+    });
+  }
 }
 
 function applyPlaybackState() {
@@ -5385,7 +5417,7 @@ function switchSettingsTab(tab) {
   document.querySelectorAll('#settingsTabs .settings-tab').forEach(b => {
     b.classList.toggle('active', b.dataset.settingsTab === tab);
   });
-  const map = { home: 'paneHome', seg: 'paneSeg', music: 'paneMusic', deploy: 'paneDeploy' };
+  const map = { home: 'paneHome', seg: 'paneSeg', music: 'paneMusic' };
   Object.entries(map).forEach(([k, id]) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -5776,7 +5808,7 @@ async function exportPublishPackage() {
       `提示：\n` +
       `· 朋友访问主网址看到访客模式\n` +
       `· 你访问加 ?edit=1 的网址进入编辑模式\n` +
-      `· 这个包只适合发布；想换设备恢复，去 ⚙ 设置 - 部署教程 里点 "💾 备份草稿"\n`
+      `· 这个包只适合发布；想换设备恢复，去 ⚙ 设置 里点 "💾 备份草稿"\n`
     );
     
     // Compress + add images
@@ -6162,7 +6194,7 @@ function setBgmVolume(v) {
 audio.volume = getBgmVolume();
 
 async function loadBgmFromDB() {
-  // First try IndexedDB (local owner uploads)
+  // 1) Try IndexedDB first (when owner has uploaded a file locally)
   try {
     const blob = await dbGet(BGM_KEY);
     if (blob) {
@@ -6175,7 +6207,7 @@ async function loadBgmFromDB() {
   } catch(err) {
     console.error('Load BGM from DB failed:', err);
   }
-  // Fallback: try to load bgm.mp3 from same directory (for deployed site)
+  // 2) Fallback: try bgm.mp3 sitting next to index.html (deployed site)
   try {
     const resp = await fetch('bgm.mp3', { method: 'HEAD' });
     if (resp.ok) {
@@ -6184,7 +6216,7 @@ async function loadBgmFromDB() {
       return true;
     }
   } catch(err) {
-    // bgm.mp3 not found in deployment — silently ignore
+    // bgm.mp3 not present — silently skip
   }
   return false;
 }
@@ -6225,9 +6257,20 @@ function setupAutoplayUnblock() {
 }
 
 function updateMusicButton() {
-  // Toolbar music button has been merged into the Settings → 背景音乐 tab.
-  // Refresh the music pane UI if the settings modal is currently open
-  // and on the music pane, so play/pause state stays in sync.
+  // Sync floating BGM button state
+  const btn = document.getElementById('bgmFloatBtn');
+  if (btn) {
+    if (!audio.src) {
+      btn.classList.add('hidden');
+    } else {
+      btn.classList.remove('hidden');
+      btn.classList.toggle('playing', !!bgmPlaying);
+      btn.classList.toggle('muted', !bgmPlaying);
+      btn.classList.toggle('pending', !!bgmAutoplayPending);
+      btn.title = bgmPlaying ? '暂停背景音乐' : '播放背景音乐';
+    }
+  }
+  // Refresh the music pane UI if the settings modal is open on the music pane
   const modal = document.getElementById('settingsModal');
   if (modal && modal.classList.contains('active')) {
     const musicPane = document.getElementById('paneMusic');
@@ -6236,6 +6279,31 @@ function updateMusicButton() {
     }
   }
 }
+
+// Floating button click handler — toggle play/pause
+(function setupBgmFloatBtn(){
+  const btn = document.getElementById('bgmFloatBtn');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    if (!audio.src) {
+      await loadBgmFromDB();
+      if (!audio.src) return;
+    }
+    try {
+      if (audio.paused) {
+        await audio.play();
+        bgmPlaying = true;
+        bgmAutoplayPending = false;
+      } else {
+        audio.pause();
+        bgmPlaying = false;
+      }
+      updateMusicButton();
+    } catch(e) {
+      console.error('toggle BGM failed:', e);
+    }
+  });
+})();
 
 audio.addEventListener('play', () => { bgmPlaying = true; updateMusicButton(); });
 audio.addEventListener('pause', () => { bgmPlaying = false; updateMusicButton(); });
@@ -6476,6 +6544,55 @@ function applyMapTransform() {
   if (svg) {
     svg.style.transform = `translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom})`;
   }
+}
+
+// On mobile, default to 1.5x zoom centered on the home location.
+// Computes the pan offset needed so that the home marker lands at the visible center.
+function applyDefaultMobileZoom() {
+  if (!isMobile()) return;
+  // Skip if user already interacted (zoomed/panned manually)
+  if (mapZoom !== 1 || mapPanX !== 0 || mapPanY !== 0) return;
+  
+  const wrap = document.querySelector('.map-svg-wrap');
+  const svg = document.getElementById('mapSvg');
+  if (!wrap || !svg) return;
+  
+  const wrapRect = wrap.getBoundingClientRect();
+  if (wrapRect.width === 0 || wrapRect.height === 0) return;
+  
+  // Compute home's pixel position within the SVG element (CSS pixels).
+  // SVG viewBox is 0..mapW × 0..mapH; preserveAspectRatio="xMidYMid meet" letterboxes.
+  const homeP = projectFn ? projectFn(HOME_LOC) : null;
+  if (!homeP) return;
+  
+  // SVG element's actual displayed size after letterboxing
+  const svgRect = svg.getBoundingClientRect();
+  // Scale of viewBox -> displayed pixels (uniform under "meet")
+  const sx = svgRect.width / mapW;
+  const sy = svgRect.height / mapH;
+  const s = Math.min(sx, sy);
+  // Letterbox offsets inside the SVG element
+  const lbX = (svgRect.width - mapW * s) / 2;
+  const lbY = (svgRect.height - mapH * s) / 2;
+  // Home position in CSS pixels relative to the wrap's content box
+  const svgOffsetX = svgRect.left - wrapRect.left;
+  const svgOffsetY = svgRect.top - wrapRect.top;
+  const homeCssX = svgOffsetX + lbX + homeP[0] * s;
+  const homeCssY = svgOffsetY + lbY + homeP[1] * s;
+  // Wrap center
+  const cx = wrapRect.width / 2;
+  const cy = wrapRect.height / 2;
+  
+  // CSS transform with default transform-origin (center center) means
+  // the visible position of a point (px, py) becomes:
+  //   newX = cx + (px - cx) * zoom + panX
+  // We want home to land at (cx, cy), so:
+  //   panX = cx - (cx + (homeCssX - cx) * zoom) = -(homeCssX - cx) * zoom
+  const targetZoom = 1.5;
+  mapZoom = targetZoom;
+  mapPanX = -(homeCssX - cx) * targetZoom;
+  mapPanY = -(homeCssY - cy) * targetZoom;
+  applyMapTransform();
 }
 
 function setupMapZoom() {
